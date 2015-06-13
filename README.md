@@ -86,7 +86,7 @@ Import this "license.jar" to project.
 ###### UML Diagram
 ![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/uml.png "Uml Diagram")
 
-####Some ScreenShot
+##### Screenshots
 
 ![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/1.PNG "Show Capital on Map")
 ![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/2.PNG "Capital and Flight List")

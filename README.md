@@ -1,7 +1,7 @@
 # FlightTrackApp
 Object-Oriented Programming Term Project
 
-<Strong> SUBJECT</Strong>
+##### SUBJECT
 
 You will implement a FLIGHT TRACK application. This program should
 simulate the flights between the major capitals, such as New York, Sydney,
@@ -76,12 +76,15 @@ Please check the system requirements before installing FlightTrackApp.
 3. Open eclipse and File->import->General->Exiting Project ... and next..
 4. You should select "Select Root Directory" and your eclipse workspace 
 5. You should select this project from Projects List and finish.
-
+6. Run Map.java
 
 ### Important !!
-if This project throw "JxBrowser license check failed: No valid license found. "
+If this project throw "JxBrowser license check failed: No valid license found. "
 you must go to http://www.teamdev.com/jxbrowser and download evaluation key.
 Import this "license.jar" to project.
+
+###### UML Diagram
+![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/uml.png "Uml Diagram")
 
 ####Some ScreenShot
 

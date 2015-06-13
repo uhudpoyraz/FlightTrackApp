@@ -67,3 +67,27 @@ thread. The system would create a thread for each scheduled flight. After
 the completion of the landing, the system should kill the related thread.
 </p>
 </ol>
+## Installation
+
+Please check the system requirements before installing FlightTrackApp.
+
+1. You should use "download zip" button for downloading.
+2. You should extract zip to eclipse workspace.
+3. Open eclipse and File->import->General->Exiting Project ... and next..
+4. You should select "Select Root Directory" and your eclipse workspace 
+5. You should select this project from Projects List and finish.
+
+
+### Important !!
+if This project throw "JxBrowser license check failed: No valid license found. "
+you must go to http://www.teamdev.com/jxbrowser and download evaluation key.
+Import this "license.jar" to project.
+
+####Some ScreenShot
+Inline-style: 
+![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/1.PNG "Show Capital on Map")
+![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/1.PNG "Show Capital on Map")
+![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/1.PNG "Show Capital on Map")
+![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/1.PNG "Show Capital on Map")
+![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/1.PNG "Show Capital on Map")
+![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/1.PNG "Show Capital on Map")

@@ -97,3 +97,8 @@ Import this "license.jar" to project.
 ![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/7.PNG "other")
 ![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/8.PNG "other")
 ![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/9.PNG "report file")
+
+
+### Licence
+
+[MIT license](http://opensource.org/licenses/MIT)

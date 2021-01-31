@@ -1,22 +1,28 @@
 package proje;
 
-import jpa.CapitalJpa;
-import jpa.FlightJpa;
 import java.awt.EventQueue;
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import com.teamdev.jxbrowser.chromium.Browser;
-import com.teamdev.jxbrowser.chromium.events.FinishLoadingEvent;
-import com.teamdev.jxbrowser.chromium.events.LoadAdapter;
-import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+
+import com.teamdev.jxbrowser.browser.Browser;
+import com.teamdev.jxbrowser.engine.Engine;
+import com.teamdev.jxbrowser.engine.EngineOptions;
+import com.teamdev.jxbrowser.engine.RenderingMode;
+import com.teamdev.jxbrowser.frame.Frame;
+import com.teamdev.jxbrowser.navigation.event.FrameLoadFinished;
+import com.teamdev.jxbrowser.view.swing.BrowserView;
+
+import jpa.CapitalJpa;
+import jpa.FlightJpa;
 
 
 public class Map {
@@ -50,8 +56,14 @@ public class Map {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		final Browser browser = new Browser();
-		BrowserView browserView = new BrowserView(browser);
+		System.setProperty("jxbrowser.license.key", Constants.KEY);
+		Engine engine = Engine.newInstance(
+		        EngineOptions.newBuilder(RenderingMode.HARDWARE_ACCELERATED).build());
+
+		final Browser browser = engine.newBrowser();
+		BrowserView browserView = BrowserView.newInstance(browser);
+		
+		Frame frame = browser.mainFrame().get();
 		frmFlightMap = new JFrame();
 		frmFlightMap.setTitle("Flight Map");
 		frmFlightMap.setBounds(100, 100, 600, 600);
@@ -62,12 +74,12 @@ public class Map {
 		
 		JMenu mapM = new JMenu("Map");
 		menuBar.add(mapM);
-		
+				
 		JMenuItem mapClearMi = new JMenuItem("Clear Map");
 		 mapClearMi.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                browser.executeJavaScript("deleteOverlays();");
-               browser.executeJavaScript("deleteOverlaysLines()"); 
+            		frame.executeJavaScript("deleteOverlays();");
+            		frame.executeJavaScript("deleteOverlaysLines()"); 
             }
         });
 
@@ -80,11 +92,11 @@ public class Map {
 		reloadCapitalMi.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	CapitalJpa capitalList=new CapitalJpa();
-					try {
+            		try {
 						for (CapitalJpa capitalJpa : capitalList.getList())
 						  {
 						
-						  browser
+							frame
 						  .executeJavaScript("var myLatlng = new google.maps.LatLng("
 						  +capitalJpa.getLat()+","+capitalJpa.getLng()+");\n" +
 						  "var marker"+capitalJpa.getId()+"= new google.maps.Marker({\n" +
@@ -94,23 +106,23 @@ public class Map {
 						  
 						  
 						  
-						  browser.executeJavaScript(" var infoWindowContent"+capitalJpa.getId()+" = "
+							frame.executeJavaScript(" var infoWindowContent"+capitalJpa.getId()+" = "
 						  		+ "'<div class=\"info_content\"> "
 						  		 
 						  		+ "<p>"+capitalJpa.getName()+"</p></div>';");
-						  browser.executeJavaScript(" var infoWindow"+capitalJpa.getId()+"  = new google.maps.InfoWindow({ content: infoWindowContent"+capitalJpa.getId()+" });");
-						  browser.executeJavaScript("google.maps.event.addListener(marker"+capitalJpa.getId()+", 'click', function() { "
+							frame.executeJavaScript(" var infoWindow"+capitalJpa.getId()+"  = new google.maps.InfoWindow({ content: infoWindowContent"+capitalJpa.getId()+" });");
+							frame.executeJavaScript("google.maps.event.addListener(marker"+capitalJpa.getId()+", 'click', function() { "
 						  		+ "infoWindow"+capitalJpa.getId()+".open(map, marker"+capitalJpa.getId()+"); "
 						  				+ "});");
 						 
-						  browser.executeJavaScript("markers.push(marker"+capitalJpa.getId()+");");
+							frame.executeJavaScript("markers.push(marker"+capitalJpa.getId()+");");
 						  }
 					} catch (Exception ex) {
 						// TODO Auto-generated catch block
 						ex.printStackTrace();
 					}
-			
-            }
+				
+              }
         });
 
 		mapM.add(reloadCapitalMi);
@@ -120,60 +132,58 @@ public class Map {
 		drawAllRouteMi.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				 FlightJpa flightJpa=new FlightJpa();
-				 
-				
-				try {
-					for (FlightJpa flight : flightJpa.getList()) {
-						CapitalJpa origin =new CapitalJpa().findById(flight.getOriginId());
-						CapitalJpa destination = new CapitalJpa().findById(flight.getDestinationId());
-						browser.executeJavaScript("var myLatlng = new google.maps.LatLng("
-								+ origin.getLat()
-								+ ","
-								+ origin.getLng()
-								+ ");\n"
-								+ "var marker = new google.maps.Marker({\n"
-								+ "    position: myLatlng,\n"
-								+ "    map: map,\n"
-								+ "	 icon: 'icon/direction_up.png',"
-								+ "    title: '" + origin.getName() + "'\n" + "});"
-										+ "markers.push(marker);");
-						browser.executeJavaScript("var myLatlng = new google.maps.LatLng("
-								+ destination.getLat()
-								+ ","
-								+ destination.getLng()
-								+ ");\n"
-								+ "var marker = new google.maps.Marker({\n"
-								+ "    position: myLatlng,\n"
-								+ "    map: map,\n"
-								+ "	 icon: 'icon/direction_down.png',"
-								+ "    title: '" + origin.getName() + "'\n" + "});"
-										+ "markers.push(marker);");
-						browser.executeJavaScript("var line = new google.maps.Polyline({"
-								+ "path: ["
-								+ "new google.maps.LatLng("
-								+ origin.getLat()
-								+ ","
-								+ origin.getLng()
-								+ "), "
-								+ "new google.maps.LatLng("
-								+ destination.getLat()
-								+ ","
-								+ destination.getLng()
-								+ ")"
-								+ "],"
-								+ "            strokeColor:  getRandomColor(),"
-								+ "            strokeOpacity: 1.0,"
-								+ "            geodesic: true,"
-								+ "            map: map"
-								+ "        });"
-								+ "line.setMap(map);");
-						browser.executeJavaScript("lines.push(line);");
-					
-					}
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+						try {
+							for (FlightJpa flight : flightJpa.getList()) {
+								CapitalJpa origin =new CapitalJpa().findById(flight.getOriginId());
+								CapitalJpa destination = new CapitalJpa().findById(flight.getDestinationId());
+								frame.executeJavaScript("var myLatlng = new google.maps.LatLng("
+										+ origin.getLat()
+										+ ","
+										+ origin.getLng()
+										+ ");\n"
+										+ "var marker = new google.maps.Marker({\n"
+										+ "    position: myLatlng,\n"
+										+ "    map: map,\n"
+										+ "	 icon: 'icon/direction_up.png',"
+										+ "    title: '" + origin.getName() + "'\n" + "});"
+												+ "markers.push(marker);");
+								frame.executeJavaScript("var myLatlng = new google.maps.LatLng("
+										+ destination.getLat()
+										+ ","
+										+ destination.getLng()
+										+ ");\n"
+										+ "var marker = new google.maps.Marker({\n"
+										+ "    position: myLatlng,\n"
+										+ "    map: map,\n"
+										+ "	 icon: 'icon/direction_down.png',"
+										+ "    title: '" + origin.getName() + "'\n" + "});"
+												+ "markers.push(marker);");
+								frame.executeJavaScript("var line = new google.maps.Polyline({"
+										+ "path: ["
+										+ "new google.maps.LatLng("
+										+ origin.getLat()
+										+ ","
+										+ origin.getLng()
+										+ "), "
+										+ "new google.maps.LatLng("
+										+ destination.getLat()
+										+ ","
+										+ destination.getLng()
+										+ ")"
+										+ "],"
+										+ "            strokeColor:  getRandomColor(),"
+										+ "            strokeOpacity: 1.0,"
+										+ "            geodesic: true,"
+										+ "            map: map"
+										+ "        });"
+										+ "line.setMap(map);");
+								frame.executeJavaScript("lines.push(line);");
+							
+							}
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 				 
 			}
 		});
@@ -287,48 +297,43 @@ public class Map {
 			}
 		});
 		/*Burada program ilk açýlýþta kayitli havalanlarýný listeliyor*/
-		browser.addLoadListener(new LoadAdapter() {
-
-			public void onFinishLoadingFrame(FinishLoadingEvent  event) {
-				 	CapitalJpa capitalList=new CapitalJpa();
-				  
-				  try {
-					for (CapitalJpa capitalJpa : capitalList.getList())
-					  {
+		browser.navigation().on(FrameLoadFinished.class, event -> {
+			CapitalJpa capitalList=new CapitalJpa();
+			  
+			  try {
+				for (CapitalJpa capitalJpa : capitalList.getList())
+				  {
 					
-					  browser
-					  .executeJavaScript("var myLatlng = new google.maps.LatLng("
-					  +capitalJpa.getLat()+","+capitalJpa.getLng()+");\n" +
-					  "var marker"+capitalJpa.getId()+"= new google.maps.Marker({\n" +
-					  "    position: myLatlng,\n" + "    map: map,\n" 
-					  + "	 icon: 'icon/airport_runway.png',"
-					  +  "    title: '"+capitalJpa.getName()+"'\n" + "});"); 
-					  
-					  
-					  
-					  browser.executeJavaScript(" var infoWindowContent"+capitalJpa.getId()+" = "
-					  		+ "'<div class=\"info_content\"> "
-					  		 
-					  		+ "<p>"+capitalJpa.getName()+"</p></div>';");
-					  browser.executeJavaScript(" var infoWindow"+capitalJpa.getId()+"  = new google.maps.InfoWindow({ content: infoWindowContent"+capitalJpa.getId()+" });");
-					  browser.executeJavaScript("google.maps.event.addListener(marker"+capitalJpa.getId()+", 'click', function() { "
-					  		+ "infoWindow"+capitalJpa.getId()+".open(map, marker"+capitalJpa.getId()+"); "
-					  				+ "});");
-					 
-					  browser.executeJavaScript("markers.push(marker"+capitalJpa.getId()+");");
-					  }
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} 
- 		 	  
-			}
-
-		});  
+				  event.frame().executeJavaScript("var myLatlng = new google.maps.LatLng("
+				  +capitalJpa.getLat()+","+capitalJpa.getLng()+");\n" +
+				  "var marker"+capitalJpa.getId()+"= new google.maps.Marker({\n" +
+				  "    position: myLatlng,\n" + "    map: map,\n" 
+				  + "	 icon: 'icon/airport_runway.png',"
+				  +  "    title: '"+capitalJpa.getName()+"'\n" + "});"); 
+				  
+				  
+				  
+				  event.frame().executeJavaScript(" var infoWindowContent"+capitalJpa.getId()+" = "
+				  		+ "'<div class=\"info_content\"> "
+				  		 
+				  		+ "<p>"+capitalJpa.getName()+"</p></div>';");
+				  event.frame().executeJavaScript(" var infoWindow"+capitalJpa.getId()+"  = new google.maps.InfoWindow({ content: infoWindowContent"+capitalJpa.getId()+" });");
+				  event.frame().executeJavaScript("google.maps.event.addListener(marker"+capitalJpa.getId()+", 'click', function() { "
+				  		+ "infoWindow"+capitalJpa.getId()+".open(map, marker"+capitalJpa.getId()+"); "
+				  				+ "});");
+				 
+				  event.frame().executeJavaScript("markers.push(marker"+capitalJpa.getId()+");");
+				  }
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		});
+		
 		frmFlightMap.getContentPane().add(browserView);
 		File mapHtml = new File("flightmap.html");
 		System.out.println(mapHtml.getAbsolutePath());
-		browser.loadURL(mapHtml.getAbsolutePath());
+		browser.navigation().loadUrl(mapHtml.getAbsolutePath());
 	}
 
 }

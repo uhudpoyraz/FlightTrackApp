@@ -1,26 +1,28 @@
 package proje;
 
-import jpa.CapitalJpa;
-
 import java.awt.Component;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JButton;
-
-import com.teamdev.jxbrowser.chromium.Browser;
-import com.teamdev.jxbrowser.chromium.JSValue;
-import com.teamdev.jxbrowser.chromium.swing.BrowserView;
-
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import com.teamdev.jxbrowser.browser.Browser;
+import com.teamdev.jxbrowser.engine.Engine;
+import com.teamdev.jxbrowser.engine.EngineOptions;
+import com.teamdev.jxbrowser.engine.RenderingMode;
+import com.teamdev.jxbrowser.js.JsObject;
+import com.teamdev.jxbrowser.view.swing.BrowserView;
+
+import jpa.CapitalJpa;
 
 public class AddCapital {
 
@@ -44,20 +46,26 @@ public class AddCapital {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		final Browser browser = new Browser();
-		BrowserView browserView = new BrowserView(browser);
+		System.setProperty("jxbrowser.license.key", Constants.KEY);
+		Engine engine = Engine.newInstance(
+		        EngineOptions.newBuilder(RenderingMode.HARDWARE_ACCELERATED).build());
+
+		final Browser browser = engine.newBrowser();
+		BrowserView browserView = BrowserView.newInstance(browser);
+		
+		
 		browserView.addMouseListener(new MouseAdapter() {
 			/*burada haritaya týklayarak o yerin kordinatýný alýyorum*/
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				browser.executeJavaScriptAndReturnValue("google.maps.event.addListener(map, 'click', function(event) {"
+				browser.mainFrame().get().executeJavaScript("google.maps.event.addListener(map, 'click', function(event) {"
 						+ "    addMarker(event.latLng);"
 						+ " document.title=event.latLng;"
 
 						+ "});");
-				JSValue marker = browser
-						.executeJavaScriptAndReturnValue("document.title");
-				capitalLocationF.setText(marker.getString());
+				JsObject marker = browser.mainFrame().get()
+						.executeJavaScript("document.title");
+				capitalLocationF.setText(marker.toString());
 
 			}
 		});
@@ -141,7 +149,7 @@ public class AddCapital {
 		
 		File mapHtml = new File("map.html");
 		System.out.println(mapHtml.getAbsolutePath());
-		browser.loadURL(mapHtml.getAbsolutePath());
+		browser.navigation().loadUrl(mapHtml.getAbsolutePath());
 
 	}
 }

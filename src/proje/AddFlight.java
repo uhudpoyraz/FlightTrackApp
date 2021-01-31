@@ -1,52 +1,50 @@
 package proje;
 
 import java.awt.Component;
-
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-
-import com.teamdev.jxbrowser.chromium.Browser;
-import com.teamdev.jxbrowser.chromium.events.TitleEvent;
-import com.teamdev.jxbrowser.chromium.events.TitleListener;
-import com.teamdev.jxbrowser.chromium.swing.BrowserView;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerDateModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import com.teamdev.jxbrowser.browser.Browser;
+import com.teamdev.jxbrowser.browser.event.TitleChanged;
+import com.teamdev.jxbrowser.engine.Engine;
+import com.teamdev.jxbrowser.engine.EngineOptions;
+import com.teamdev.jxbrowser.engine.RenderingMode;
+import com.teamdev.jxbrowser.event.Subscription;
+import com.teamdev.jxbrowser.view.swing.BrowserView;
 
 import jpa.CapitalJpa;
 import jpa.FlightJpa;
-
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.FileNotFoundException;
-
-import javax.swing.SwingConstants;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerDateModel;
-
-import java.util.Date;
-import java.util.Calendar;
-
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.SpinnerNumberModel;
 
 public class AddFlight {
 
@@ -90,8 +88,12 @@ public class AddFlight {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void initialize() throws Exception {
-		final Browser browser = new Browser();
-		BrowserView browserView = new BrowserView(browser);
+		System.setProperty("jxbrowser.license.key", Constants.KEY);
+		Engine engine = Engine.newInstance(
+		        EngineOptions.newBuilder(RenderingMode.HARDWARE_ACCELERATED).build());
+
+		final Browser browser = engine.newBrowser();
+		BrowserView browserView = BrowserView.newInstance(browser);
 		CapitalJpa capitalJpa=new CapitalJpa();
 
 		String[] comboBoxModelJpa = new String[capitalJpa.getList().size() + 1];
@@ -279,12 +281,11 @@ public class AddFlight {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				browser.executeJavaScript("origin= new google.maps.LatLng("+ capitalQueryOrigin.getLat() + ","+ capitalQueryOrigin.getLng()+ ");");
-				browser.executeJavaScript("calculateDistances();");
-				browser.addTitleListener(new TitleListener() {
-					/*burada compenentdeki degiþikliðe göre iki havaalaný arasýndaki mesafi bulup ucus süresini hesaplýyorum*/
-		            public void onTitleChange(TitleEvent event) {		    
-		                distanceValL.setText(event.getTitle());
+				browser.mainFrame().get().executeJavaScript("origin= new google.maps.LatLng("+ capitalQueryOrigin.getLat() + ","+ capitalQueryOrigin.getLng()+ ");");
+				browser.mainFrame().get().executeJavaScript("calculateDistances();");
+				Subscription subscription = browser.on(TitleChanged.class, event -> {
+					
+					 distanceValL.setText(event.title());
 		                NumberFormat formatter = new DecimalFormat("#0.00");
 						Double flighTime=Double.parseDouble(distanceValL.getText())/Double.parseDouble(speedJ.getSelectedItem().toString());
 						String[] timeToText=formatter.format(flighTime).split(",");
@@ -307,8 +308,8 @@ public class AddFlight {
 						setMiliseconds(timestamp);
 						arrivalTimeS.setModel(new SpinnerDateModel(new Date(getMiliseconds()), null, null, Calendar.DAY_OF_YEAR));
 						
-		            }
-		        }); 
+				});
+			
 				   
 			}
 		});
@@ -325,21 +326,21 @@ public class AddFlight {
 					e1.printStackTrace();
 				}
 				
-				browser.executeJavaScript("destination= new google.maps.LatLng("+ capitalQueryDestination.getLat()+ ","+ capitalQueryDestination.getLng() + ");");
-				browser.executeJavaScript("calculateDistances();");
+				browser.mainFrame().get().executeJavaScript("destination= new google.maps.LatLng("+ capitalQueryDestination.getLat()+ ","+ capitalQueryDestination.getLng() + ");");
+				browser.mainFrame().get().executeJavaScript("calculateDistances();");
 				/*burada iki havaalaný arasýndaki mesafi bulup ucus süresini hesaplýyorum*/
-				browser.addTitleListener(new TitleListener() {
-		            public void onTitleChange(TitleEvent event) {
-		                distanceValL.setText(event.getTitle());
-		                NumberFormat formatter = new DecimalFormat("#0.00");
-						Double flighTime=Double.parseDouble(distanceValL.getText())/Double.parseDouble(speedJ.getSelectedItem().toString());
-						String[] timeToText=formatter.format(flighTime).split(",");
-						String minute=formatter.format(Integer.parseInt(timeToText[1])*0.6);
-						setHour(Integer.parseInt(timeToText[0]));
-						setMinute(Integer.parseInt(minute.substring(0,2).replace(",","")));
-						timeToHourL.setText(getHour()+" Saat "+getMinute()+" Dakika");
-		            }
-		        }); 
+				Subscription subscription = browser.on(TitleChanged.class, event -> {
+					
+	                distanceValL.setText(event.title());
+	                NumberFormat formatter = new DecimalFormat("#0.00");
+					Double flighTime=Double.parseDouble(distanceValL.getText())/Double.parseDouble(speedJ.getSelectedItem().toString());
+					String[] timeToText=formatter.format(flighTime).split(",");
+					String minute=formatter.format(Integer.parseInt(timeToText[1])*0.6);
+					setHour(Integer.parseInt(timeToText[0]));
+					setMinute(Integer.parseInt(minute.substring(0,2).replace(",","")));
+					timeToHourL.setText(getHour()+" Saat "+getMinute()+" Dakika");
+				});
+ 
 					long timestamp=0;
 					String departureTime=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(departureDateSpinner.getValue());
 					try {
@@ -417,7 +418,7 @@ public class AddFlight {
 		
 		File mapHtml = new File("addflightmap.html");
 		System.out.println(mapHtml.getAbsolutePath());
-		browser.loadURL(mapHtml.getAbsolutePath());
+		browser.navigation().loadUrl(mapHtml.getAbsolutePath());
 
 	}
 

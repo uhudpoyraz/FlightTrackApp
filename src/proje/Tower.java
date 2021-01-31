@@ -4,10 +4,11 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
+
+import com.teamdev.jxbrowser.browser.Browser;
+
 import jpa.CapitalJpa;
 import jpa.FlightJpa;
-
-import com.teamdev.jxbrowser.chromium.Browser;
 
 public class Tower implements Runnable {
 
@@ -90,31 +91,31 @@ public class Tower implements Runnable {
 			int pointDistance = i * Integer.parseInt(getFlight().getDistance())
 					/ speedOfdistanceRatio * 1000;
 
-			browser.executeJavaScript("var origin" + getFlight().getId()
+			browser.mainFrame().get().executeJavaScript("var origin" + getFlight().getId()
 					+ "= new google.maps.LatLng(" + originLat + "," + originLng
 					+ ");\n");
-			browser.executeJavaScript("var destination" + getFlight().getId()
+			browser.mainFrame().get().executeJavaScript("var destination" + getFlight().getId()
 					+ "= new google.maps.LatLng(" + destinationLat + ","
 					+ destinationLng + ");\n");
-			browser.executeJavaScript("var angle" + getFlight().getId()
+			browser.mainFrame().get().executeJavaScript("var angle" + getFlight().getId()
 					+ " = google.maps.geometry.spherical.computeHeading(origin"
 					+ getFlight().getId() + ",destination"
 					+ getFlight().getId() + ")");
-			browser.executeJavaScript("var newLatLng"
+			browser.mainFrame().get().executeJavaScript("var newLatLng"
 					+ getFlight().getId()
 					+ " = new google.maps.geometry.spherical.computeOffset(origin"
 					+ getFlight().getId() + "," + pointDistance + ", angle"
 					+ getFlight().getId() + ");");
 
-			browser.executeJavaScript("var marker" + getFlight().getId()
+			browser.mainFrame().get().executeJavaScript("var marker" + getFlight().getId()
 					+ "= new google.maps.Marker({\n" + "  position: newLatLng"
 					+ getFlight().getId() + ",\n" + "" + "	 map: map,\n"
 					+ "	 icon: 'icon/airport_" + directionY + "_" + directionX
 					+ ".png'," + "  title: '"+getFlight().getAirlinesName()+"'\n" + "});");
-			browser.executeJavaScript("markers.push(marker"
+			browser.mainFrame().get().executeJavaScript("markers.push(marker"
 					+ getFlight().getId() + ");");
 
-			browser.executeJavaScript(" var infoWindowContent"
+			browser.mainFrame().get().executeJavaScript(" var infoWindowContent"
 					+ getFlight().getId() + " = "
 					+ "'<div class=\"info_content\"> "
 
@@ -130,11 +131,11 @@ public class Tower implements Runnable {
 					+ "Arrival Time: " + getFlight().getArrivalTime() + "</br>"
 					+ "Landing Time: "+ getFlight().getLandingTime() + " min </br>"
 					+ "</p></div>';");
-			browser.executeJavaScript(" var infoWindow"
+			browser.mainFrame().get().executeJavaScript(" var infoWindow"
 					+ getFlight().getId()
 					+ "  = new google.maps.InfoWindow({ content: infoWindowContent"
 					+ getFlight().getId() + " });");
-			browser.executeJavaScript("google.maps.event.addListener(marker"
+			browser.mainFrame().get().executeJavaScript("google.maps.event.addListener(marker"
 					+ getFlight().getId() + ", 'click', function() { "
 					+ "infoWindow" + getFlight().getId() + ".open(map, marker"
 					+ getFlight().getId() + "); " + "});");
@@ -209,7 +210,7 @@ public class Tower implements Runnable {
 						+ ".setMap(null);");
 
 				Thread.sleep(1000);
-				browser.executeJavaScript("marker" + getFlight().getId()
+				browser.mainFrame().get().executeJavaScript("marker" + getFlight().getId()
 						+ ".setMap(null);");
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block

@@ -80,8 +80,9 @@ Please check the system requirements before installing FlightTrackApp.
 
 ### Important !!
 If this project throw "JxBrowser license check failed: No valid license found. "
-you must go to http://www.teamdev.com/jxbrowser and download evaluation key.
-Import this "license.jar" to project.
+you must go to https://www.teamdev.com/jxbrowser#evaluate and get evaluation key.
+Follow instructions https://jxbrowser-support.teamdev.com/docs/guides/licensing.html#adding-the-license-to-a-project
+
 
 ###### UML Diagram
 ![alt text](https://github.com/uhudpoyraz/FlightTrackApp/blob/master/otherfiles/uml.png "Uml Diagram")
